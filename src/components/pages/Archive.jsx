@@ -27,10 +27,10 @@ const Archive = () => {
 
   const loadArchivedTasks = async () => {
     setLoading(true);
-    setError(null);
+setError(null);
     try {
       const tasks = await taskService.getArchived();
-      setArchivedTasks(tasks);
+      setArchivedTasks(tasks || []);
     } catch (err) {
       setError(err.message || 'Failed to load archived tasks');
       toast.error('Failed to load archived tasks');
@@ -53,7 +53,7 @@ const Archive = () => {
     setFilteredTasks(filtered);
   };
 
-  const handleTaskUnarchive = async (taskId) => {
+const handleTaskUnarchive = async (taskId) => {
     try {
       await taskService.unarchive(taskId);
       setArchivedTasks(prev => prev.filter(task => task.Id !== taskId));
@@ -65,8 +65,7 @@ const Archive = () => {
 
   const handleTaskDelete = async (taskId) => {
     if (!window.confirm('Permanently delete this task? This action cannot be undone.')) return;
-    
-    try {
+try {
       await taskService.delete(taskId);
       setArchivedTasks(prev => prev.filter(task => task.Id !== taskId));
       toast.success('Task permanently deleted');

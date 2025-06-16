@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify';
-import TaskCard from '@/components/molecules/TaskCard';
-import SearchBar from '@/components/molecules/SearchBar';
-import FilterBar from '@/components/molecules/FilterBar';
-import SkeletonLoader from '@/components/molecules/SkeletonLoader';
-import ErrorState from '@/components/molecules/ErrorState';
-import EmptyState from '@/components/molecules/EmptyState';
-import { taskService } from '@/services';
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
+import TaskCard from "@/components/molecules/TaskCard";
+import SearchBar from "@/components/molecules/SearchBar";
+import FilterBar from "@/components/molecules/FilterBar";
+import SkeletonLoader from "@/components/molecules/SkeletonLoader";
+import ErrorState from "@/components/molecules/ErrorState";
+import EmptyState from "@/components/molecules/EmptyState";
+import { taskService } from "@/services";
 
 const TaskList = ({ categoryFilter = 'all' }) => {
   const [tasks, setTasks] = useState([]);
@@ -40,12 +40,12 @@ const TaskList = ({ categoryFilter = 'all' }) => {
     applyFilters();
   }, [tasks, searchQuery, filters, categoryFilter]);
 
-  const loadTasks = async () => {
+const loadTasks = async () => {
     setLoading(true);
     setError(null);
     try {
       const tasksData = await taskService.getAll();
-      setTasks(tasksData.filter(task => !task.archived));
+      setTasks((tasksData || []).filter(task => !task.archived));
     } catch (err) {
       setError(err.message || 'Failed to load tasks');
       toast.error('Failed to load tasks');
@@ -69,9 +69,9 @@ const TaskList = ({ categoryFilter = 'all' }) => {
         filtered = filtered.filter(task => task.priority === 'high');
       } else if (categoryFilter === 'completed') {
         filtered = filtered.filter(task => task.completed);
-      } else {
+} else {
         filtered = filtered.filter(task => 
-          task.categoryId === categoryFilter
+          task.category_id === categoryFilter
         );
       }
     }
@@ -185,86 +185,69 @@ const TaskList = ({ categoryFilter = 'all' }) => {
 
   return (
     <div className="space-y-6">
-      {/* Search and Filters */}
-      <div className="space-y-4">
+    {/* Search and Filters */}
+    <div className="space-y-4">
         <SearchBar
-          onSearch={handleSearch}
-          onClear={handleClearSearch}
-          placeholder="Search tasks..."
-        />
-        
+            onSearch={handleSearch}
+            onClear={handleClearSearch}
+            placeholder="Search tasks..." />
         <FilterBar
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onClearFilters={handleClearFilters}
-        />
-      </div>
-
-      {/* Task List */}
-      <div className="space-y-3">
-        {filteredTasks.length === 0 && !loading ? (
-          <EmptyState
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters} />
+    </div>
+    {/* Task List */}
+    <div className="space-y-3">
+        {filteredTasks.length === 0 && !loading ? <EmptyState
             title="No tasks found"
-            description={
-              searchQuery || Object.values(filters).some(f => f && filters.all !== f)
-                ? "Try adjusting your search or filters"
-                : "Create your first task to get started!"
-            }
-            icon={
-              searchQuery || Object.values(filters).some(f => f && filters.all !== f)
-                ? "Search" 
-                : "CheckSquare"
-            }
-            actionLabel={
-              searchQuery || Object.values(filters).some(f => f && filters.all !== f)
-                ? "Clear filters"
-                : "Add your first task"
-            }
-            onAction={
-              searchQuery || Object.values(filters).some(f => f && filters.all !== f)
-                ? handleClearFilters
-                : () => window.dispatchEvent(new CustomEvent('openQuickAdd'))
-            }
-          />
-        ) : (
-          <AnimatePresence mode="popLayout">
-            {filteredTasks.map((task, index) => (
-              <motion.div
+            description={searchQuery || Object.values(filters).some(f => f && filters.all !== f) ? "Try adjusting your search or filters" : "Create your first task to get started!"}
+icon={searchQuery || Object.values(filters).some(f => f && filters.all !== f) ? "Search" : "CheckSquare"}
+            actionLabel={searchQuery || Object.values(filters).some(f => f && filters.all !== f) ? "Clear filters" : "Add your first task"}
+            onAction={searchQuery || Object.values(filters).some(f => f && filters.all !== f) ? handleClearFilters : () => window.dispatchEvent(new window.CustomEvent("openQuickAdd"))} /> : <AnimatePresence mode="popLayout">
+            {filteredTasks.map((task, index) => <motion.div
                 key={task.Id}
                 layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                transition={{ 
-                  delay: index * 0.05,
-                  layout: { duration: 0.3 }
+                initial={{
+                    opacity: 0,
+                    y: 20
                 }}
-              >
-                <TaskCard
-                  task={task}
-                  onUpdate={handleTaskUpdate}
-                  onDelete={handleTaskDelete}
-                  showCategory={categoryFilter === 'all'}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        )}
-      </div>
+                animate={{
+                    opacity: 1,
+                    y: 0
+                }}
+                exit={{
+                    opacity: 0,
+                    y: -20,
+                    scale: 0.95
+                }}
+                transition={{
+                    delay: index * 0.05,
 
-      {/* Results Summary */}
-      {filteredTasks.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-4"
-        >
-          <p className="text-sm text-gray-500">
-            Showing {filteredTasks.length} of {tasks.length} tasks
-          </p>
-        </motion.div>
-      )}
+                    layout: {
+                        duration: 0.3
+                    }
+                }}>
+                <TaskCard
+                    task={task}
+                    onUpdate={handleTaskUpdate}
+                    onDelete={handleTaskDelete}
+                    showCategory={categoryFilter === "all"} />
+            </motion.div>)}
+        </AnimatePresence>}
     </div>
+    {/* Results Summary */}
+    {filteredTasks.length > 0 && <motion.div
+        initial={{
+            opacity: 0
+        }}
+        animate={{
+            opacity: 1
+        }}
+className="text-center py-4">
+        <p className="text-sm text-gray-500">Showing {filteredTasks.length} of {tasks.length} tasks
+                      </p>
+    </motion.div>}
+</div>
   );
 };
 

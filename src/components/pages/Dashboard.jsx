@@ -28,10 +28,16 @@ const Dashboard = () => {
     return () => window.removeEventListener('categoryChanged', handleCategoryChange);
   }, []);
 
-  const loadStats = async () => {
+const loadStats = async () => {
     try {
       const statsData = await taskService.getStats();
-      setStats(statsData);
+      setStats(statsData || {
+        total: 0,
+        completed: 0,
+        pending: 0,
+        completionRate: 0,
+        todayCompleted: 0
+      });
     } catch (error) {
       console.error('Failed to load stats:', error);
     }
